@@ -223,3 +223,5 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 }
 
 .related-list{display:flex;flex-wrap:wrap;gap:8px}.related-list button{cursor:pointer}
+
+.simpson-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}.simpson-table th,.simpson-table td{text-align:left;padding:8px 4px;border-bottom:1px solid currentColor}.simpson-table th{font-weight:600}#savedFilter[aria-pressed=true],[data-save][aria-pressed=true]{outline:2px solid currentColor;outline-offset:-2px}

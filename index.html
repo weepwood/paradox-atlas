@@ -46,7 +46,7 @@
     <section class="stats section-shell" aria-label="内容统计">
       <article><strong id="paradoxCount">34</strong><span>个经典悖论</span></article>
       <article><strong>6</strong><span>个认知领域</span></article>
-      <article><strong>4</strong><span>个交互实验</span></article>
+      <article><strong>5</strong><span>个交互实验</span></article>
       <article><strong>∞</strong><span>种思考路径</span></article>
     </section>
 
@@ -80,7 +80,7 @@
         <div class="filter-row" id="filterRow" role="group" aria-label="按分类筛选"></div>
       </div>
 
-      <div class="result-meta"><span id="resultCount" aria-live="polite"></span><button id="clearBtn" hidden>清除筛选</button></div>
+      <div class="result-meta"><button class="filter-button" id="savedFilter" aria-pressed="false">仅收藏 (0)</button><span id="resultCount" aria-live="polite"></span><button id="clearBtn" hidden>清除筛选</button></div>
       <div class="paradox-grid" id="paradoxGrid"></div>
       <div class="empty-state" id="emptyState" hidden>
         <strong>没有找到匹配的悖论</strong>
@@ -133,6 +133,14 @@
             <label>对方选择<select id="otherChoice"><option value="cooperate">合作</option><option value="betray">背叛</option></select></label>
           </div>
           <div class="payoff" id="payoffResult"><strong>双方各获 3 分</strong><span>共同最优，但不是单次博弈中的稳定选择。</span></div>
+        </article>
+        <article class="lab-card simpson-card">
+          <div class="lab-card-head"><span>统计</span><h3>辛普森悖论实验</h3></div>
+          <p>两组中 A 的成功率都高于 B，但样本分配不均时，合并结果可能反转。以下为假设数据。</p>
+          <label class="range-label" for="simpsonRange"><span>A 在高成功率组中的人数（总计 100）</span><output id="simpsonWeight">20</output></label>
+          <input type="range" id="simpsonRange" min="5" max="95" step="5" value="20">
+          <table class="simpson-table"><thead><tr><th>分组</th><th>A</th><th>B</th></tr></thead><tbody id="simpsonRows"></tbody></table>
+          <p id="simpsonResult" role="status"></p>
         </article>
       </div>
     </section>

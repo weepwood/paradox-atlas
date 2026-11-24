@@ -41,7 +41,12 @@ const paradoxes = [
 ];
 
 const categories = ["全部", ...new Set(paradoxes.map(item => item.category))];
-const state = { category: "全部", query: "" };
+const state = { category: "全部", query: "", savedOnly:false };
+let savedIds = new Set();
+try { const stored=JSON.parse(localStorage.getItem("paradox-saved")||"[]"); if(Array.isArray(stored)) savedIds=new Set(stored.filter(id=>paradoxes.some(p=>p.id===id))); } catch(_) {}
+const savedFilter=document.querySelector("#savedFilter");
+function updateSavedFilter(){savedFilter.textContent="仅收藏 ("+savedIds.size+")";savedFilter.setAttribute("aria-pressed",String(state.savedOnly));}
+savedFilter.addEventListener("click",()=>{state.savedOnly=!state.savedOnly;updateSavedFilter();renderCards();});
 const grid = document.querySelector("#paradoxGrid");
 const filterRow = document.querySelector("#filterRow");
 const resultCount = document.querySelector("#resultCount");
@@ -62,7 +67,7 @@ function getFilteredParadoxes() {
   return paradoxes.filter(item => {
     const matchesCategory = state.category === "全部" || item.category === state.category;
     const haystack = [item.name, item.category, item.type, item.summary, item.question, item.core, item.insight, ...item.tags].join(" ").toLowerCase();
-    return matchesCategory && (!keyword || haystack.includes(keyword));
+    return matchesCategory && (!keyword || haystack.includes(keyword)) && (!state.savedOnly || savedIds.has(item.id));
   });
 }
 
@@ -79,7 +84,7 @@ function renderCards() {
   resultCount.textContent = `显示 ${items.length} / ${paradoxes.length} 个悖论`;
   emptyState.hidden = items.length !== 0;
   document.querySelector("#randomBtn").disabled = items.length === 0;
-  clearBtn.hidden = state.category === "全部" && !state.query;
+  clearBtn.hidden = state.category === "全部" && !state.query && !state.savedOnly;
 }
 
 function updateView() { renderFilters(); renderCards(); }
@@ -92,6 +97,7 @@ function openParadox(id) {
     <article class="dialog-content">
       <span class="dialog-label">NO.${String(item.id).padStart(2, "0")} · ${item.category}</span>
       <h2>${item.name}</h2>
+      <button class="filter-button" data-save="${item.id}" aria-pressed="${savedIds.has(item.id)}">${savedIds.has(item.id)?"取消收藏":"收藏条目"}</button>
       <p class="dialog-lead">${item.summary}</p>
       <section class="dialog-section"><h3>悖论问题</h3><p>${item.question}</p></section>
       <section class="dialog-section"><h3>矛盾从哪里产生</h3><p>${item.core}</p></section>
@@ -104,7 +110,13 @@ function openParadox(id) {
   dialog.querySelector("#dialogClose").focus();
 }
 
-dialogContent.addEventListener("click", event => { const button = event.target.closest("[data-related]"); if (button) openParadox(button.dataset.related); });
+dialogContent.addEventListener("click", event => {
+  const button = event.target.closest("[data-related]"); if (button) { openParadox(button.dataset.related); return; }
+  const save = event.target.closest("[data-save]"); if (!save) return;
+  const id=Number(save.dataset.save); if(savedIds.has(id)) savedIds.delete(id); else savedIds.add(id);
+  try { localStorage.setItem("paradox-saved",JSON.stringify([...savedIds])); } catch(_) {}
+  save.textContent=savedIds.has(id)?"取消收藏":"收藏条目";save.setAttribute("aria-pressed",String(savedIds.has(id)));updateSavedFilter();renderCards();
+});
 
 filterRow.addEventListener("click", event => {
   const button = event.target.closest("[data-category]");
@@ -120,7 +132,7 @@ grid.addEventListener("click", event => {
 });
 
 searchInput.addEventListener("input", event => { state.query = event.target.value; renderCards(); });
-clearBtn.addEventListener("click", () => { state.category = "全部"; state.query = ""; searchInput.value = ""; updateView(); });
+clearBtn.addEventListener("click", () => { state.category = "全部"; state.query = ""; state.savedOnly=false; updateSavedFilter(); searchInput.value = ""; updateView(); });
 document.querySelector("#dialogClose").addEventListener("click", () => dialog.close());
 dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
 
@@ -205,5 +217,18 @@ document.querySelector("#otherChoice").addEventListener("change", updatePayoff);
 
 document.querySelector("#paradoxCount").textContent = paradoxes.length;
 document.querySelector("#closingCount").textContent = `继续探索 ${paradoxes.length} 个悖论 →`;
+updateSavedFilter();
 updateView();
 updateBirthday();
+
+// Simpson: expected successes, not randomly sampled integer counts.
+const simpsonRange = document.querySelector("#simpsonRange");
+function renderSimpson() {
+  const aHigh=Number(simpsonRange.value), aLow=100-aHigh, bHigh=100-aHigh, bLow=aHigh;
+  const a=.9*aHigh+.3*aLow, b=.8*bHigh+.2*bLow;
+  document.querySelector("#simpsonWeight").textContent=aHigh;
+  document.querySelector("#simpsonRows").innerHTML='<tr><th>高成功率组</th><td>90% · '+aHigh+' 人</td><td>80% · '+bHigh+' 人</td></tr><tr><th>低成功率组</th><td>30% · '+aLow+' 人</td><td>20% · '+bLow+' 人</td></tr><tr><th>合并预期率</th><td>'+a.toFixed(1)+'%</td><td>'+b.toFixed(1)+'%</td></tr>';
+  document.querySelector("#simpsonResult").textContent=a<b-1e-9?"发生反转：分组内 A 均更高，但合并后 B 更高。":a>b+1e-9?"未反转：合并后 A 仍更高。":"合并后的预期成功率相同。";
+}
+simpsonRange.addEventListener("input",renderSimpson);
+renderSimpson();

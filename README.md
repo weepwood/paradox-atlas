@@ -47,3 +47,5 @@ python -m http.server 8080
 - Production branch：`main`
 
 将 Netlify 项目关联到 `weepwood/paradox-atlas` 后，即可启用持续部署。
+
+新增辛普森悖论交互实验（固定分组成功率、可调样本权重，展示预期成功率）与本地知识收藏。
