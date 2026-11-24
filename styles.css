@@ -221,3 +221,5 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+.related-list{display:flex;flex-wrap:wrap;gap:8px}.related-list button{cursor:pointer}

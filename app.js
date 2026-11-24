@@ -33,7 +33,11 @@ const paradoxes = [
 
   { id: 28, name: "乌鸦悖论", category: "知识与观察", type: "确证悖论", summary: "“所有乌鸦都是黑的”等价于“所有非黑物都不是乌鸦”，观察白鞋似乎也能支持乌鸦命题。", question: "逻辑等价的命题应获得完全相同的证据支持吗？", core: "纯逻辑确证与证据相关性的日常直觉发生冲突。", insight: "贝叶斯分析会认为白鞋只提供极其微弱的支持，而黑乌鸦提供更强信息。", tags: ["科学确证", "归纳", "证据"] },
   { id: 29, name: "知道者悖论", category: "知识与观察", type: "认识论悖论", summary: "“这句话不可能被知道”为真时，我们似乎已知道它；若为假，则它可能被知道。", question: "一个命题能否一致地断言自身不可被知道？", core: "知识算子与自指结合，会触发类似说谎者悖论的矛盾。", insight: "形式认识逻辑需要限制自指句或重新定义知识闭包规则。", tags: ["知识", "自指", "认识逻辑"] },
-  { id: 30, name: "观察者悖论", category: "知识与观察", type: "测量反身性", summary: "观察一个系统的行为，可能改变系统本身，使我们无法看到“未被观察时”的原状。", question: "测量结果反映对象本身，还是对象对测量的反应？", core: "观察者进入因果链，参与塑造被观测现象。", insight: "社会研究、用户实验、量子测量与金融市场都需要评估反身性和观察效应。", tags: ["反身性", "测量", "观察效应"] }
+  { id: 30, name: "观察者悖论", category: "知识与观察", type: "测量反身性", summary: "观察一个系统的行为，可能改变系统本身，使我们无法看到“未被观察时”的原状。", question: "测量结果反映对象本身，还是对象对测量的反应？", core: "观察者进入因果链，参与塑造被观测现象。", insight: "社会研究、用户实验、量子测量与金融市场都需要评估反身性和观察效应。", tags: ["反身性", "测量", "观察效应"] },
+{"id":31,"name":"纽康姆悖论","category":"决策与社会","type":"决策理论","summary":"预测者已经按你的预测选择放钱，拿一个盒子还是两个？","question":"应根据条件相关性选择，还是依据行动的因果后果选择？","core":"预测可靠性使选择与既有盒中金额相关，但当下选择不能改变已经放入的钱。","insight":"证据决策理论与因果决策理论在给定模型下可能得出不同建议；问题没有无条件一致的答案。","tags":["因果","预测","决策理论"]},
+{"id":32,"name":"男孩女孩悖论","category":"概率与统计","type":"条件概率","summary":"一个有两个孩子的家庭，已知至少有一个男孩；两个都是男孩的概率是多少？","question":"为什么随机抽取家庭与随机询问一个孩子可能得到不同答案？","core":"在独立且男女等概率的简化模型下，已知至少一个男孩得到 1/3；若随机指定一个孩子并得知他是男孩，另一个为男孩的概率是 1/2。","insight":"抽样和信息披露方式决定条件概率，必须明确事件与生成机制。","tags":["条件概率","抽样","选择偏差"]},
+{"id":33,"name":"汤姆森灯悖论","category":"数学与无穷","type":"超任务","summary":"灯每隔前一次间隔的一半切换一次，经过有限总时间后是什么状态？","question":"无限次切换在有限时间内完成，是否必然有确定终态？","core":"开关状态序列在 0 与 1 之间交替，没有极限；有限的总时间并不保证状态序列收敛。","insight":"区分时间序列的收敛与系统状态的收敛，终点状态需要额外定义。","tags":["无穷","极限","超任务"]},
+{"id":34,"name":"黎曼重排定理","category":"数学与无穷","type":"条件收敛","summary":"条件收敛的实数级数可以通过重排收敛到不同指定实数。","question":"为什么有限和的交换律不能直接推广到所有无穷级数？","core":"无穷和由部分和的极限定义；改变项的顺序可能改变极限。","insight":"绝对收敛保证重排不改变和，条件收敛不具备这一保证。","tags":["无穷","极限","收敛"]}
 ];
 
 const categories = ["全部", ...new Set(paradoxes.map(item => item.category))];
@@ -83,6 +87,7 @@ function updateView() { renderFilters(); renderCards(); }
 function openParadox(id) {
   const item = paradoxes.find(paradox => paradox.id === Number(id));
   if (!item) return;
+  const related = paradoxes.filter(p => p.id !== item.id).map(p => ({p,score: p.tags.filter(tag => item.tags.includes(tag)).length * 3 + (p.category === item.category ? 1 : 0)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score || a.p.id-b.p.id).slice(0,4);
   dialogContent.innerHTML = `
     <article class="dialog-content">
       <span class="dialog-label">NO.${String(item.id).padStart(2, "0")} · ${item.category}</span>
@@ -92,9 +97,14 @@ function openParadox(id) {
       <section class="dialog-section"><h3>矛盾从哪里产生</h3><p>${item.core}</p></section>
       <section class="dialog-section"><h3>理解与启示</h3><p>${item.insight}</p></section>
       <div class="dialog-tags">${item.tags.map(tag => `<span># ${tag}</span>`).join("")}</div>
+      <section class="dialog-section"><h3>关联阅读</h3><div class="related-list">${related.map(({p}) => `<button class="filter-button" data-related="${p.id}">${p.name}</button>`).join("")}</div></section>
     </article>`;
-  dialog.showModal();
+  if (!dialog.open) dialog.showModal();
+  dialog.scrollTop = 0;
+  dialog.querySelector("#dialogClose").focus();
 }
+
+dialogContent.addEventListener("click", event => { const button = event.target.closest("[data-related]"); if (button) openParadox(button.dataset.related); });
 
 filterRow.addEventListener("click", event => {
   const button = event.target.closest("[data-category]");
@@ -193,5 +203,7 @@ function updatePayoff() {
 document.querySelector("#playerChoice").addEventListener("change", updatePayoff);
 document.querySelector("#otherChoice").addEventListener("change", updatePayoff);
 
+document.querySelector("#paradoxCount").textContent = paradoxes.length;
+document.querySelector("#closingCount").textContent = `继续探索 ${paradoxes.length} 个悖论 →`;
 updateView();
 updateBirthday();
