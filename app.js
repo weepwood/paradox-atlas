@@ -49,7 +49,7 @@ const dialogContent = document.querySelector("#dialogContent");
 
 function renderFilters() {
   filterRow.innerHTML = categories.map(category => `
-    <button class="filter-button ${state.category === category ? "active" : ""}" data-category="${category}">${category}</button>
+    <button class="filter-button ${state.category === category ? "active" : ""}" data-category="${category}" aria-pressed="${state.category === category}">${category}</button>
   `).join("");
 }
 
@@ -74,6 +74,7 @@ function renderCards() {
   `).join("");
   resultCount.textContent = `显示 ${items.length} / ${paradoxes.length} 个悖论`;
   emptyState.hidden = items.length !== 0;
+  document.querySelector("#randomBtn").disabled = items.length === 0;
   clearBtn.hidden = state.category === "全部" && !state.query;
 }
 
@@ -100,6 +101,7 @@ filterRow.addEventListener("click", event => {
   if (!button) return;
   state.category = button.dataset.category;
   updateView();
+  [...filterRow.querySelectorAll("[data-category]")].find(el => el.dataset.category === state.category)?.focus();
 });
 
 grid.addEventListener("click", event => {
@@ -113,17 +115,21 @@ document.querySelector("#dialogClose").addEventListener("click", () => dialog.cl
 dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
 
 document.querySelector("#randomBtn").addEventListener("click", () => {
-  const item = paradoxes[Math.floor(Math.random() * paradoxes.length)];
+  const items = getFilteredParadoxes();
+  if (!items.length) return;
+  const item = items[Math.floor(Math.random() * items.length)];
   openParadox(item.id);
 });
 
 const themeBtn = document.querySelector("#themeBtn");
-const savedTheme = localStorage.getItem("paradox-theme");
-if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+try {
+  const savedTheme = localStorage.getItem("paradox-theme");
+  if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme;
+} catch (_) {}
 themeBtn.addEventListener("click", () => {
   const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
   document.documentElement.dataset.theme = next;
-  localStorage.setItem("paradox-theme", next);
+  try { localStorage.setItem("paradox-theme", next); } catch (_) {}
 });
 
 function simulateMontyHall(rounds = 1000) {
@@ -145,6 +151,7 @@ function simulateMontyHall(rounds = 1000) {
 document.querySelector("#montyBtn").addEventListener("click", () => simulateMontyHall());
 
 function birthdayProbability(people) {
+  if (people > 365) return 100;
   let noMatch = 1;
   for (let i = 0; i < people; i += 1) noMatch *= (365 - i) / 365;
   return (1 - noMatch) * 100;
@@ -158,16 +165,18 @@ function updateBirthday() {
 peopleRange.addEventListener("input", updateBirthday);
 
 const hotelRooms = document.querySelector("#hotelRooms");
-let hotelGuest = 9;
+let hotelMoves = 0;
+let hotelTimer;
 function renderHotel(shifted = false) {
-  hotelRooms.innerHTML = Array.from({ length: 8 }, (_, index) => `<span class="room ${shifted ? "shifted" : ""}">${index + 1}<br>客${index + (hotelGuest > 9 ? 0 : 1)}</span>`).join("");
+  hotelRooms.innerHTML = Array.from({ length: 8 }, (_, index) => `<span class="room ${shifted ? "shifted" : ""}">${index + 1}<br>${index < hotelMoves ? "新客" + (hotelMoves - index) : "客" + (index - hotelMoves + 1)}</span>`).join("");
 }
 renderHotel();
 document.querySelector("#hotelBtn").addEventListener("click", () => {
-  hotelGuest += 1;
+  hotelMoves += 1;
   renderHotel(true);
-  document.querySelector("#hotelStatus").textContent = `所有房客向后移动，新客人入住 1 号房（已演示 ${hotelGuest - 8} 次）`;
-  window.setTimeout(() => renderHotel(false), 580);
+  document.querySelector("#hotelStatus").textContent = `新客${hotelMoves} 入住 1 号房，原房客依次后移（已演示 ${hotelMoves} 次，画面仅展示前 8 间）`;
+  clearTimeout(hotelTimer);
+  hotelTimer = window.setTimeout(() => renderHotel(false), 580);
 });
 
 const payoffMap = {

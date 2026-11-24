@@ -19,7 +19,7 @@
       <span><strong>悖论图鉴</strong><small>PARADOX ATLAS</small></span>
     </a>
     <nav class="header-actions" aria-label="页面操作">
-      <button class="icon-button" id="randomBtn" title="随机探索一个悖论">随机探索</button>
+      <button class="icon-button" id="randomBtn" title="在当前筛选结果中随机探索">随机探索</button>
       <button class="icon-button" id="themeBtn" aria-label="切换明暗主题" title="切换明暗主题">◐</button>
     </nav>
   </header>
@@ -75,12 +75,12 @@
       <div class="toolbar">
         <label class="search-box">
           <span aria-hidden="true">⌕</span>
-          <input id="searchInput" type="search" placeholder="搜索名称、问题或关键词…" autocomplete="off" />
+          <input id="searchInput" aria-label="搜索悖论" type="search" placeholder="搜索名称、问题或关键词…" autocomplete="off" />
         </label>
         <div class="filter-row" id="filterRow" role="group" aria-label="按分类筛选"></div>
       </div>
 
-      <div class="result-meta"><span id="resultCount"></span><button id="clearBtn" hidden>清除筛选</button></div>
+      <div class="result-meta"><span id="resultCount" aria-live="polite"></span><button id="clearBtn" hidden>清除筛选</button></div>
       <div class="paradox-grid" id="paradoxGrid"></div>
       <div class="empty-state" id="emptyState" hidden>
         <strong>没有找到匹配的悖论</strong>
@@ -110,7 +110,7 @@
 
         <article class="lab-card birthday-card">
           <div class="lab-card-head"><span>统计</span><h3>生日碰撞计算器</h3></div>
-          <p>一个群体里，至少两个人生日相同的概率有多高？</p>
+          <p>假设生日在 365 天均匀且独立分布（忽略闰日），至少两个人生日相同的概率有多高？</p>
           <div class="birthday-output"><strong id="birthdayProbability">50.7%</strong><span>至少两人同生日</span></div>
           <label class="range-label" for="peopleRange"><span>人数</span><output id="peopleOutput">23</output></label>
           <input id="peopleRange" type="range" min="2" max="70" value="23" />
@@ -121,7 +121,7 @@
           <div class="lab-card-head"><span>无穷</span><h3>希尔伯特旅馆</h3></div>
           <p>旅馆已经“住满”，但只需把第 n 号房客移到第 n+1 号房，1 号房就能接待新客人。</p>
           <div class="hotel-rooms" id="hotelRooms" aria-live="polite"></div>
-          <p class="hotel-status" id="hotelStatus">8 间房全部住满</p>
+          <p class="hotel-status" id="hotelStatus">无限间房全部住满（画面仅展示前 8 间）</p>
           <button class="lab-button" id="hotelBtn">接待一位新客人</button>
         </article>
 
@@ -149,7 +149,7 @@
     <a href="https://app.notion.com/p/3a0db2844e78814cbff3f4a403a023ab" target="_blank" rel="noreferrer">查看原始 Notion 文档</a>
   </footer>
 
-  <dialog class="paradox-dialog" id="paradoxDialog">
+  <dialog class="paradox-dialog" id="paradoxDialog" aria-label="悖论详情">
     <button class="dialog-close" id="dialogClose" aria-label="关闭">×</button>
     <div id="dialogContent"></div>
   </dialog>
